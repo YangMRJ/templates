@@ -1,0 +1,865 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-bs-theme="light">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Painel Unificado Ergon - Prefeitura do Rio de Janeiro</title>
+
+    <!-- Bootstrap + Icons -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+
+    <link rel="stylesheet" href="Styles.css" />
+
+</head>
+<body>
+
+    <!-- ============================================================
+    NAVBAR FIXA
+    ============================================================ -->
+    <nav class="navbar-custom">
+        <a class="navbar-brand" href="#">
+            <img src="https://lh3.googleusercontent.com/d/1GcTDxz0TG4ILhE1y9stqMDQ0Jf1v1l2w" alt="Prefeitura do Rio de Janeiro" />
+            <span>PREFEITURA DO RIO DE JANEIRO | Painel Ergon</span>
+        </a>
+        <div class="d-flex align-items-center gap-3">
+            <span class="navbar-text" id="btnGestao" onclick="abrirModalGestao()">
+                <i class="bi bi-person-gear me-1"></i> Módulo de Gestão
+            </span>
+            <button class="theme-toggle-btn" id="btnThemeToggle" onclick="toggleDarkMode()">
+                <i class="bi bi-moon-stars-fill" id="themeIcon"></i>
+                <span id="themeText">Modo Escuro</span>
+            </button>
+        </div>
+    </nav>
+
+    <!-- ============================================================
+    SIDEBAR FIXA
+    ============================================================ -->
+    <div class="sidebar" id="sidebarPrincipal">
+        <div id="welcomeCardSidebar" class="card card-custom p-3 mb-3 text-center">
+            <i class="bi bi-person-circle fs-1 text-primary"></i>
+            <h5 class="mt-2">Bem‑vindo(a)</h5>
+            <p class="small text-muted mb-0">Faça login para acessar os módulos</p>
+        </div>
+
+        <div class="nav flex-column nav-pills" id="v-pills-tab" role="tablist">
+            <a class="nav-link active" id="tab-comparativo" data-bs-toggle="pill" href="#sec-comparativo" role="tab">
+                <span class="icon-box"><i class="bi bi-sliders"></i></span>
+                <span>Comparativo Folha</span>
+            </a>
+            <a class="nav-link" id="tab-carga" data-bs-toggle="pill" href="#sec-carga" role="tab">
+                <span class="icon-box"><i class="bi bi-file-earmark-arrow-up"></i></span>
+                <span>Carga de Eleitos</span>
+            </a>
+            <a class="nav-link" id="tab-cons" data-bs-toggle="pill" href="#sec-cons" role="tab">
+                <span class="icon-box"><i class="bi bi-receipt-cutoff"></i></span>
+                <span>Consignado</span>
+            </a>
+            <a class="nav-link" id="tab-cronograma" data-bs-toggle="pill" href="#sec-cronograma" role="tab">
+                <span class="icon-box"><i class="bi bi-calendar3"></i></span>
+                <span>Cronograma Folha</span>
+            </a>
+            <a class="nav-link" id="tab-estagiarios" data-bs-toggle="pill" href="#sec-estagiarios" role="tab">
+                <span class="icon-box"><i class="bi bi-mortarboard"></i></span>
+                <span>Liquidação Estagiários</span>
+            </a>
+            <a class="nav-link" id="tab-cargaarquivos" data-bs-toggle="pill" href="#sec-cargaarquivos" role="tab">
+                <span class="icon-box"><i class="bi bi-archive"></i></span>
+                <span>Carga de Arquivos</span>
+            </a>
+            <hr />
+
+            <!-- Área de login – sempre no rodapé -->
+            <div id="sidebarLoginArea">
+                <div id="loginFormArea">
+                    <h6 class="text-center text-secondary mb-2"><i class="bi bi-lock-fill me-1"></i>Autenticação</h6>
+                    <form id="formLoginSidebar">
+                        <div class="mb-2">
+                            <input type="text" class="form-control form-control-sm" id="loginUsuarioSidebar" placeholder="Código (Ex: 10987800)" required />
+                        </div>
+                        <div class="mb-2">
+                            <input type="password" class="form-control form-control-sm" id="loginSenhaSidebar" placeholder="Senha" required />
+                        </div>
+                        <div id="loginMessageSidebar" class="text-danger small mb-2" style="display:none;"></div>
+                        <button type="submit" class="btn btn-rio btn-sm w-100">Entrar</button>
+                    </form>
+                </div>
+
+                <div id="userInfoSidebar" style="display:none;" class="text-center">
+                    <i class="bi bi-person-circle fs-4"></i>
+                    <span id="userNameDisplaySidebar" class="d-block fw-bold"></span>
+                    <span id="userCodeDisplaySidebar" class="text-muted small"></span>
+                    <hr />
+                    <form id="formCredenciais" class="mt-2">
+                        <div class="mb-2">
+                            <input type="text" class="form-control form-control-sm" id="oracleUserSidebar" placeholder="Usuário Oracle" required />
+                        </div>
+                        <div class="mb-2">
+                            <input type="password" class="form-control form-control-sm" id="oraclePasswordSidebar" placeholder="Senha Oracle" required />
+                        </div>
+                        <div id="credenciaisMessage" class="small mb-2" style="display:none;"></div>
+                        <button type="submit" class="btn btn-outline-success btn-sm w-100">Salvar Credenciais</button>
+                    </form>
+                    <hr />
+                    <button id="btnLogoutSidebar" class="btn btn-outline-danger btn-sm w-100">Sair</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============================================================
+    CONTEÚDO PRINCIPAL (rolável)
+    ============================================================ -->
+    <div class="main-content" id="mainContent">
+
+        <div id="welcomeContent">
+            <div class="display-6 mb-3">📋 Painel Unificado Ergon</div>
+            <p class="lead text-muted">
+                Sistema de gestão de folha de pagamento da Prefeitura do Rio de Janeiro.
+                <br />Faça login para acessar os módulos operacionais.
+            </p>
+            <hr class="w-25 mx-auto" />
+            <p class="small text-secondary">
+                <i class="bi bi-shield-lock me-1"></i> Ambiente seguro – autenticação obrigatória
+            </p>
+        </div>
+
+        <div class="main-tab-content" id="v-pills-tabContent">
+
+            <!-- 1. COMPARATIVO -->
+            <div class="tab-pane fade show active" id="sec-comparativo" role="tabpanel">
+                <div class="card card-custom">
+                    <div class="card-header-custom">
+                        <span><i class="bi bi-sliders me-2 text-primary"></i> Relatório Comparativo de Folha</span>
+                        <span class="badge bg-primary">Módulo 1</span>
+                    </div>
+                    <div class="card-body">
+                        <form id="formComparativo" class="row g-3">
+                            <div class="col-md-3">
+                                <label for="compMesAnt" class="form-label fw-bold">Mês Anterior</label>
+                                <input type="text" class="form-control" id="compMesAnt" placeholder="01/01/2026" required />
+                            </div>
+                            <div class="col-md-3">
+                                <label for="compMesAtu" class="form-label fw-bold">Mês Atual</label>
+                                <input type="text" class="form-control" id="compMesAtu" placeholder="01/02/2026" required />
+                            </div>
+                            <div class="col-md-3">
+                                <label for="compNumFolha" class="form-label fw-bold">Número(s) da Folha</label>
+                                <input type="text" class="form-control" id="compNumFolha"
+                                      placeholder="Ex: 1, 2, 4" value="1" required />
+                                <small class="text-muted">Separe múltiplos números por vírgula</small>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="compEmp" class="form-label fw-bold">Empresa (EMP)</label>
+                                <input type="number" class="form-control" id="compEmp" value="1" required />
+                            </div>
+                            <div class="col-12 text-center">
+                                <button type="submit" class="btn btn-rio"><i class="bi bi-search me-1"></i> Gerar Comparativo</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div id="loaderComparativo" class="text-center my-4 loading-spinner" style="display:none;">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <p class="mt-2 text-muted">Processando dados...</p>
+                </div>
+
+                <div id="resComparativoContainer" style="display: none;">
+                    <div class="card card-custom">
+                        <div class="card-header-custom">
+                            <span id="tituloRelatorioComp">Resultado do Comparativo</span>
+                            <button class="btn btn-sm btn-outline-success" onclick="exportarTabelaCSV('tbComparativo', 'comparativo_folha.csv')">
+                                <i class="bi bi-filetype-csv me-1"></i> Exportar CSV
+                            </button>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="tf-filterbar" id="tf-bar-tbComparativo"></div>
+                            <div class="table-responsive">
+                                <table class="table table-hover align-middle table-custom mb-0" id="tbComparativo">
+                                    <thead>
+                                        <tr>
+                                            <th>Rubrica</th>
+                                            <th>Compl.</th>
+                                            <th class="text-center">Qtd. Ant.</th>
+                                            <th class="text-center">Val. Anterior (R$)</th>
+                                            <th class="text-center">Qtd. Atu.</th>
+                                            <th class="text-center">Val. Atual (R$)</th>
+                                            <th class="text-center">Dif. Valor (R$)</th>
+                                            <th class="text-center">Dif. %</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="bodyComparativo"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. CARGA DE ELEITOS -->
+            <div class="tab-pane fade" id="sec-carga" role="tabpanel">
+                <div class="card card-custom">
+                    <div class="card-header-custom">
+                        <span><i class="bi bi-file-earmark-arrow-up me-2 text-secondary"></i> Carga de Eleitos TSVE Desligados</span>
+                        <span class="badge bg-secondary">Módulo 2</span>
+                    </div>
+                    <div class="card-body">
+                        <form id="formCargaEleitos" class="row g-3">
+                            <div class="col-md-4">
+                                <label for="dtVac1" class="form-label">Data Vacância Inicial</label>
+                                <input type="text" class="form-control" id="dtVac1" placeholder="DD/MM/YYYY" required />
+                            </div>
+                            <div class="col-md-4">
+                                <label for="dtVac2" class="form-label">Data Vacância Final</label>
+                                <input type="text" class="form-control" id="dtVac2" placeholder="DD/MM/YYYY" required />
+                            </div>
+                            <div class="col-md-4">
+                                <label for="dtIniFolha" class="form-label">Data Início da Folha</label>
+                                <input type="text" class="form-control" id="dtIniFolha" placeholder="DD/MM/YYYY" required />
+                            </div>
+
+                            <h6 class="mt-4 mb-2 text-primary"><i class="bi bi-gear-wide-connected me-1"></i> Códigos dos Grupos</h6>
+                            <div class="col-md-3">
+                                <label for="grupoSME" class="form-label">Grupo SME</label>
+                                <input type="text" class="form-control" id="grupoSME" value="237" />
+                            </div>
+                            <div class="col-md-3">
+                                <label for="grupoSMS" class="form-label">Grupo SMS</label>
+                                <input type="text" class="form-control" id="grupoSMS" value="238" />
+                            </div>
+                            <div class="col-md-3">
+                                <label for="grupoPGM" class="form-label">Grupo PGM</label>
+                                <input type="text" class="form-control" id="grupoPGM" value="239" />
+                            </div>
+                            <div class="col-md-3">
+                                <label for="grupoOutros" class="form-label">Grupo OUTROS</label>
+                                <input type="text" class="form-control" id="grupoOutros" value="240" />
+                            </div>
+                            <div class="col-12 text-center">
+                                <button type="submit" class="btn btn-rio"><i class="bi bi-cpu me-1"></i> Processar Arquivo</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <div id="loaderCarga" class="text-center my-4 loading-spinner" style="display:none;">
+                    <div class="spinner-border text-primary" role="status"></div>
+                    <p class="mt-2 text-muted">Consultando vínculos...</p>
+                </div>
+
+                <div id="resCargaContainer" style="display: none;">
+                    <div class="card card-custom">
+                        <div class="card-header-custom">
+                            <span>Conteúdo do Arquivo TXT</span>
+                            <button class="btn btn-sm btn-outline-primary" onclick="downloadTxtOutput()">
+                                <i class="bi bi-download me-1"></i> Baixar .TXT
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div class="output-area" id="txtCargaOutput"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 3. CONSIGNADO – COM DUAS ABAS: CONFERÊNCIA E RETENÇÕES -->
+            <div class="tab-pane fade" id="sec-cons" role="tabpanel">
+                <div class="card card-custom">
+                    <div class="card-header-custom">
+                        <span><i class="bi bi-receipt-cutoff me-2 text-info"></i> Módulo de Consignados</span>
+                        <span class="badge bg-info text-dark">Análise e Retenções</span>
+                    </div>
+                    <div class="card-body">
+
+                        <!-- Abas internas: Conferência e Retenções -->
+                        <ul class="nav nav-tabs cons-inner-tabs" id="consInnerTabs" role="tablist">
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link active" id="cons-tab-conferencia" data-bs-toggle="tab" data-bs-target="#consConferencia" type="button" role="tab">Conferência de Consignados</button>
+                            </li>
+                            <li class="nav-item" role="presentation">
+                                <button class="nav-link" id="cons-tab-retencoes" data-bs-toggle="tab" data-bs-target="#consRetencoesPage" type="button" role="tab">Retenções</button>
+                            </li>
+                        </ul>
+
+                        <div class="tab-content mt-3" id="consInnerTabContent">
+
+                            <!-- ABA: CONFERÊNCIA DE CONSIGNADOS (original) -->
+                            <div class="tab-pane fade show active" id="consConferencia" role="tabpanel">
+                                <form id="formConsignado" class="row g-3">
+                                    <div class="col-md-4">
+                                        <label for="consData1" class="form-label fw-bold">1º mês</label>
+                                        <input type="date" class="form-control" id="consData1" value="2026-04-01" required />
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="consData2" class="form-label fw-bold">2º mês</label>
+                                        <input type="date" class="form-control" id="consData2" value="2026-05-01" required />
+                                    </div>
+                                    <div class="col-md-4">
+                                        <label for="consData3" class="form-label fw-bold">3º mês (referência)</label>
+                                        <input type="date" class="form-control" id="consData3" value="2026-06-01" required />
+                                    </div>
+                                    <div class="col-12 text-center">
+                                        <button type="submit" class="btn btn-rio">
+                                            <i class="bi bi-play-circle me-1"></i> Executar Conferência
+                                        </button>
+                                    </div>
+                                </form>
+
+                                <div id="loaderConsignado" class="text-center my-4 loading-spinner" style="display:none;">
+                                    <div class="spinner-border text-info" role="status"></div>
+                                    <p class="mt-2 text-muted">Processando dados...</p>
+                                </div>
+
+                                <div id="resConsignadoContainer" style="display: none;">
+                                    <div class="row mt-4" id="consResumo">
+                                        <div class="col-md-2">
+                                            <div class="card text-center p-2 border-0 bg-light">
+                                                <h6 class="text-muted">Primeira parcela</h6>
+                                                <span class="fs-3 fw-bold" id="contPrimeiraParcela">0</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <div class="card text-center p-2 border-0 bg-light">
+                                                <h6 class="text-muted">Divergência valor</h6>
+                                                <span class="fs-3 fw-bold" id="contDivergencia">0</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <div class="card text-center p-2 border-0 bg-light">
+                                                <h6 class="text-muted">Não encerradas</h6>
+                                                <span class="fs-3 fw-bold" id="contNaoEncerradas">0</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <div class="card text-center p-2 border-0 bg-light">
+                                                <h6 class="text-muted">Progressão</h6>
+                                                <span class="fs-3 fw-bold" id="contProgressao">0</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <div class="card text-center p-2 border-0 bg-light">
+                                                <h6 class="text-muted">CRÍTICA</h6>
+                                                <span class="fs-3 fw-bold" id="contCritica">0</span>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-2">
+                                            <div class="card text-center p-2 border-0 bg-light">
+                                                <h6 class="text-muted">Aumentos</h6>
+                                                <span class="fs-3 fw-bold" id="contAumentos">0</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <ul class="nav nav-tabs mt-3" id="consTabs" role="tablist">
+                                        <li class="nav-item"><button class="nav-link active" id="tab-primeira" data-bs-toggle="tab" data-bs-target="#consPrimeira" type="button">Primeira parcela</button></li>
+                                        <li class="nav-item"><button class="nav-link" id="tab-divergencia" data-bs-toggle="tab" data-bs-target="#consDivergencia" type="button">Divergência</button></li>
+                                        <li class="nav-item"><button class="nav-link" id="tab-nao-encerradas" data-bs-toggle="tab" data-bs-target="#consNaoEncerradas" type="button">Não encerradas</button></li>
+                                        <li class="nav-item"><button class="nav-link" id="tab-progressao" data-bs-toggle="tab" data-bs-target="#consProgressao" type="button">Progressão</button></li>
+                                        <li class="nav-item"><button class="nav-link" id="tab-critica" data-bs-toggle="tab" data-bs-target="#consCritica" type="button">CRÍTICA</button></li>
+                                        <li class="nav-item"><button class="nav-link" id="tab-aumentos" data-bs-toggle="tab" data-bs-target="#consAumentos" type="button">Aumentos</button></li>
+                                        <li class="nav-item"><button class="nav-link" id="tab-base" data-bs-toggle="tab" data-bs-target="#consBase" type="button">Base completa</button></li>
+                                    </ul>
+
+                                    <div class="tab-content mt-3">
+                                        <div class="tab-pane fade show active" id="consPrimeira" role="tabpanel">
+                                            <div class="tf-filterbar" id="tf-bar-tbPrimeiraParcela"></div>
+                                            <div class="table-responsive"><table class="table table-sm table-bordered table-hover" id="tbPrimeiraParcela"><thead class="table-secondary"><tr><th>Matrícula</th><th>Rubrica</th><th>Último mês</th><th>Parcela (n/N)</th></tr></thead><tbody></tbody></table></div>
+                                            <button class="btn btn-sm btn-outline-success mt-2" onclick="downloadCSV('tbPrimeiraParcela', 'primeira_parcela.csv')"><i class="bi bi-filetype-csv"></i> Baixar CSV</button>
+                                        </div>
+                                        <div class="tab-pane fade" id="consDivergencia" role="tabpanel">
+                                            <div class="tf-filterbar" id="tf-bar-tbDivergencia"></div>
+                                            <div class="table-responsive"><table class="table table-sm table-bordered table-hover" id="tbDivergencia"><thead class="table-secondary"><tr><th>Matrícula</th><th>Rubrica</th><th>Valor anterior</th><th>Valor atual</th><th>Diferença</th></tr></thead><tbody></tbody></table></div>
+                                            <button class="btn btn-sm btn-outline-success mt-2" onclick="downloadCSV('tbDivergencia', 'divergencia.csv')"><i class="bi bi-filetype-csv"></i> Baixar CSV</button>
+                                        </div>
+                                        <div class="tab-pane fade" id="consNaoEncerradas" role="tabpanel">
+                                            <div class="tf-filterbar" id="tf-bar-tbNaoEncerradas"></div>
+                                            <div class="table-responsive"><table class="table table-sm table-bordered table-hover" id="tbNaoEncerradas"><thead class="table-secondary"><tr><th>Matrícula</th><th>Rubrica</th><th>Última parcela (n/N)</th></tr></thead><tbody></tbody></table></div>
+                                            <button class="btn btn-sm btn-outline-success mt-2" onclick="downloadCSV('tbNaoEncerradas', 'nao_encerradas.csv')"><i class="bi bi-filetype-csv"></i> Baixar CSV</button>
+                                        </div>
+                                        <div class="tab-pane fade" id="consProgressao" role="tabpanel">
+                                            <div class="tf-filterbar" id="tf-bar-tbProgressao"></div>
+                                            <div class="table-responsive"><table class="table table-sm table-bordered table-hover" id="tbProgressao"><thead class="table-secondary"><tr><th>Matrícula</th><th>Rubrica</th><th>Parcela anterior</th><th>Parcela atual</th><th>Esperado</th></tr></thead><tbody></tbody></table></div>
+                                            <button class="btn btn-sm btn-outline-success mt-2" onclick="downloadCSV('tbProgressao', 'progressao.csv')"><i class="bi bi-filetype-csv"></i> Baixar CSV</button>
+                                        </div>
+                                        <div class="tab-pane fade" id="consCritica" role="tabpanel">
+                                            <div class="tf-filterbar" id="tf-bar-tbCritica"></div>
+                                            <div class="table-responsive"><table class="table table-sm table-bordered table-hover" id="tbCritica"><thead class="table-secondary"><tr><th>Matrícula</th><th>Rubrica</th><th>Mensagem</th></tr></thead><tbody></tbody></table></div>
+                                            <button class="btn btn-sm btn-outline-success mt-2" onclick="downloadCSV('tbCritica', 'critica.csv')"><i class="bi bi-filetype-csv"></i> Baixar CSV</button>
+                                        </div>
+                                        <div class="tab-pane fade" id="consAumentos" role="tabpanel">
+                                            <div class="tf-filterbar" id="tf-bar-tbAumentos"></div>
+                                            <div class="table-responsive"><table class="table table-sm table-bordered table-hover" id="tbAumentos"><thead class="table-secondary"><tr><th>Empresa</th><th>Rubrica</th><th>Nome</th><th>Variação %</th></tr></thead><tbody></tbody></table></div>
+                                            <button class="btn btn-sm btn-outline-success mt-2" onclick="downloadCSV('tbAumentos', 'aumentos.csv')"><i class="bi bi-filetype-csv"></i> Baixar CSV</button>
+                                        </div>
+                                        <div class="tab-pane fade" id="consBase" role="tabpanel">
+                                            <div class="tf-filterbar" id="tf-bar-tbBase"></div>
+                                            <div class="table-responsive" style="max-height:400px;"><table class="table table-sm table-bordered table-hover" id="tbBase"><thead class="table-secondary"><tr><th>Matrícula</th><th>Rubrica</th><th>Mês1</th><th>Mês2</th><th>Mês3</th><th>Parcelas</th></tr></thead><tbody></tbody></table></div>
+                                            <button class="btn btn-sm btn-outline-success mt-2" onclick="downloadCSV('tbBase', 'base_completa.csv')"><i class="bi bi-filetype-csv"></i> Baixar CSV</button>
+                                        </div>
+                                    </div>
+                                </div><!-- /resConsignadoContainer -->
+                            </div><!-- /consConferencia -->
+
+                            <!-- ABA: RETENÇÕES (nova) -->
+                            <div class="tab-pane fade" id="consRetencoesPage" role="tabpanel">
+                                <form id="formRetencoes" class="row g-3 mb-4">
+                                    <div class="col-md-3">
+                                        <label for="retencaoAno" class="form-label fw-bold">Ano</label>
+                                        <input type="number" class="form-control" id="retencaoAno" value="2026" min="2020" max="2030" />
+                                    </div>
+                                    <div class="col-md-5">
+                                        <label class="form-label fw-bold">Empresa</label>
+                                        <div class="dropdown">
+                                            <button class="btn btn-outline-secondary dropdown-toggle w-100 text-start" type="button"
+                                                    id="empFilterDropdownRetencoes" data-bs-toggle="dropdown" aria-expanded="false">
+                                                Todas as empresas
+                                            </button>
+                                            <ul class="dropdown-menu" aria-labelledby="empFilterDropdownRetencoes">
+                                                <li>
+                                                    <div class="form-check ms-2">
+                                                        <input class="form-check-input" type="checkbox" value="Todos" id="checkTodosRetencoes" checked>
+                                                        <label class="form-check-label" for="checkTodosRetencoes">Todas as empresas</label>
+                                                    </div>
+                                                </li>
+                                                <li><hr class="dropdown-divider"></li>
+                                                <div id="empFilterItemsRetencoes"></div>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                    <div class="col-md-2 d-flex align-items-end">
+                                        <button type="submit" class="btn btn-rio w-100" id="btnGerarRetencoes">
+                                            <i class="bi bi-play-circle me-1"></i> Gerar
+                                        </button>
+                                    </div>
+                                    <div class="col-md-2 d-flex align-items-end">
+                                        <button type="button" class="btn btn-outline-secondary w-100" id="btnLimparRetencoes">
+                                            <i class="bi bi-eraser me-1"></i> Limpar
+                                        </button>
+                                    </div>
+                                </form>
+
+                                <div id="loaderRetencoes" class="text-center my-4 loading-spinner" style="display:none;">
+                                    <div class="spinner-border text-info" role="status"></div>
+                                    <p class="mt-2 text-muted">Carregando dados...</p>
+                                </div>
+
+                                <div id="resRetencoesContainer" style="display: none;">
+
+                                    <!-- Resumo por Mês -->
+                                    <div class="card card-custom mb-4">
+                                        <div class="card-header-custom">
+                                            <span>Resumo por Mês</span>
+                                            <small class="filter-info" id="retencoesFilterInfo">Empresas: Todas as empresas</small>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="table-container">
+                                                <table id="retencoesMonthTable" class="table table-striped table-sm">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>Tipo</th>
+                                                            <th>Jan</th><th>Fev</th><th>Mar</th><th>Abr</th>
+                                                            <th>Mai</th><th>Jun</th><th>Jul</th><th>Ago</th>
+                                                            <th>Set</th><th>Out</th><th>Nov</th><th>Dez</th>
+                                                            <th>Total</th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody></tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Resumo por Fonte -->
+                                    <div class="card card-custom mb-4">
+                                        <div class="card-header-custom">
+                                            <span>Resumo por Fonte</span>
+                                            <div class="d-flex align-items-center gap-3">
+                                                <small class="filter-info" id="retencoesSourceFilterInfo">Empresas: Todas as empresas</small>
+                                                <select id="retencoesMonthSelect" class="form-select form-select-sm" style="width:auto;">
+                                                    <option value="Todos">Todos os meses</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="card-body">
+                                            <div class="table-container">
+                                                <table id="retencoesSourceTable" class="table table-striped table-sm">
+                                                    <thead><tr><th>Fonte</th></tr></thead>
+                                                    <tbody></tbody>
+                                                </table>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Rubricas -->
+                                    <div class="card card-custom">
+                                        <div class="card-header-custom">
+                                            <span>Rubricas</span>
+                                            <div class="d-flex align-items-center gap-3">
+                                                <small class="filter-info" id="retencoesRubricasFilterInfo">Empresas: Todas as empresas</small>
+                                                <select id="retencoesRubricasMonthSelect" class="form-select form-select-sm" style="width:auto;">
+                                                    <option value="Todos">Todos os meses</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="card-body" id="retencoesRubricasContainer"></div>
+                                    </div>
+
+                                </div><!-- /resRetencoesContainer -->
+                            </div><!-- /consRetencoesPage -->
+
+                        </div><!-- /consInnerTabContent -->
+                    </div>
+                </div>
+            </div><!-- /sec-cons -->
+
+            <!-- 4. CRONOGRAMA -->
+            <div class="tab-pane fade" id="sec-cronograma" role="tabpanel">
+                <div class="card card-custom">
+                    <div class="card-header-custom">
+                        <span><i class="bi bi-calendar3 me-2 text-warning"></i> Gerador de Cronograma de Folha</span>
+                        <span class="badge bg-warning text-dark">Módulo 4</span>
+                    </div>
+                    <div class="card-body">
+                        <form id="formCronograma" class="row g-3">
+                            <div class="col-md-6">
+                                <label for="mesAnoFolha" class="form-label fw-bold">Mês/Ano da Folha</label>
+                                <input type="text" class="form-control" id="mesAnoFolha" placeholder="MM/AAAA" required style="width: 40%;" />
+                            </div>
+                            <div class="col-12"><hr /></div>
+
+                            <h6 class="text-primary"><i class="bi bi-calculator me-1"></i> Datas Pré-calculadas (editáveis)</h6>
+                            <p class="text-muted small">
+                                Campos com fundo <span class="badge bg-warning text-dark">amarelo</span> foram editados manualmente.
+                                <span class="badge bg-danger text-white">Vermelho</span> indica feriado ou fim de semana.
+                            </p>
+
+                            <div class="col-md-3"><label class="form-label small text-muted">Cadastro FL20</label><input type="text" class="form-control form-control-sm campo-calculo" id="dtCadastroFl20" placeholder="DD/MM/YYYY" /></div>
+                            <div class="col-md-3"><label class="form-label small text-muted">Contagem</label><input type="text" class="form-control form-control-sm campo-calculo" id="dtContagem" placeholder="DD/MM/YYYY" /></div>
+                            <div class="col-md-3"><label class="form-label small text-muted">Anterior Contagem</label><input type="text" class="form-control form-control-sm campo-calculo" id="dtAntContagem" placeholder="DD/MM/YYYY" /></div>
+                            <div class="col-md-3"><label class="form-label small text-muted">R_3017 (Progressão)</label><input type="text" class="form-control form-control-sm campo-calculo" id="dtR3017" placeholder="DD/MM/YYYY" /></div>
+
+                            <div class="col-md-3"><label class="form-label small text-muted">Calc. FL20 (= Fim Mês Ant.)</label><input type="text" class="form-control form-control-sm campo-calculo" id="dtCalcFl20" placeholder="DD/MM/YYYY" /></div>
+                            <div class="col-md-3"><label class="form-label small text-muted">R_0980 (3 meses antes)</label><input type="text" class="form-control form-control-sm campo-calculo" id="dtR0980" placeholder="DD/MM/YYYY" /></div>
+                            <div class="col-md-3"><label class="form-label small text-muted">Conf. Ini FL20</label><input type="text" class="form-control form-control-sm campo-calculo" id="dtConfIniFl20" placeholder="DD/MM/YYYY" /></div>
+                            <div class="col-md-3"><label class="form-label small text-muted">Instruções IPLAN</label><input type="text" class="form-control form-control-sm campo-calculo" id="dtInstrucoesFl" placeholder="DD/MM/YYYY" /></div>
+
+                            <div class="col-md-3"><label class="form-label small text-muted">Últ. Dia Entrega Disk</label><input type="text" class="form-control form-control-sm campo-calculo" id="dtUltDiaEntregaDisk" placeholder="DD/MM/YYYY" /></div>
+                            <div class="col-md-3"><label class="form-label small text-muted">Alt. Fórmulas</label><input type="text" class="form-control form-control-sm campo-calculo" id="dtAltFormulas" placeholder="DD/MM/YYYY" /></div>
+                            <div class="col-md-3"><label class="form-label small text-muted">Prep. I/II</label><input type="text" class="form-control form-control-sm campo-calculo" id="dtPrepI_II" placeholder="DD/MM/YYYY" /></div>
+                            <div class="col-md-3"><label class="form-label small text-muted">Ult. Lanc. DPS</label><input type="text" class="form-control form-control-sm campo-calculo" id="dtUltLancDps" placeholder="DD/MM/YYYY" /></div>
+
+                            <div class="col-md-3"><label class="form-label small text-muted">Atual. Conta Banc.</label><input type="text" class="form-control form-control-sm campo-calculo" id="dtAtualContBanc" placeholder="DD/MM/YYYY" /></div>
+                            <div class="col-md-3"><label class="form-label small text-muted">Últ. Dia Calend. Consig</label><input type="text" class="form-control form-control-sm campo-calculo" id="dtUltDiaCalendConsig" placeholder="DD/MM/YYYY" /></div>
+                            <div class="col-md-3"><label class="form-label small text-muted">Prep. III</label><input type="text" class="form-control form-control-sm campo-calculo" id="dtPrepIII" placeholder="DD/MM/YYYY" /></div>
+                            <div class="col-md-3"><label class="form-label small text-muted">R_0966 (Abandono fim)</label><input type="text" class="form-control form-control-sm campo-calculo" id="dtR0966" placeholder="DD/MM/YYYY" /></div>
+
+                            <div class="col-md-3"><label class="form-label small text-muted">R_1503 (Férias retro)</label><input type="text" class="form-control form-control-sm campo-calculo" id="dtR1503" placeholder="DD/MM/AAAA" /></div>
+                            <div class="col-md-3"><label class="form-label small text-muted">Carga Consig. (OS31)</label><input type="text" class="form-control form-control-sm campo-calculo" id="dtCargaConsig" placeholder="DD/MM/YYYY" /></div>
+                            <div class="col-md-3"><label class="form-label small text-muted">Retorno Grupos</label><input type="text" class="form-control form-control-sm campo-calculo" id="dtRetGrupos" placeholder="DD/MM/YYYY" /></div>
+                            <div class="col-md-3"><label class="form-label small text-muted">Consol. FL20</label><input type="text" class="form-control form-control-sm campo-calculo" id="dtConsolFl20" placeholder="DD/MM/YYYY" /></div>
+
+                            <div class="col-md-3"><label class="form-label small text-muted">Valor Débito</label><input type="text" class="form-control form-control-sm campo-calculo" id="prValorDebito" placeholder="DD/MM/YYYY" /></div>
+                            <div class="col-md-3"><label class="form-label small text-muted">Prep. IV</label><input type="text" class="form-control form-control-sm campo-calculo" id="dtPrepIV" placeholder="DD/MM/YYYY" /></div>
+                            <div class="col-md-3"><label class="form-label small text-muted">Conf. FL Normal Início</label><input type="text" class="form-control form-control-sm campo-calculo" id="confere_flnormal_ini" placeholder="DD/MM/YYYY" /></div>
+                            <div class="col-md-3"><label class="form-label small text-muted">Cad. Contra-Débito</label><input type="text" class="form-control form-control-sm campo-calculo" id="cad_fl_contra_debito" placeholder="DD/MM/YYYY" /></div>
+
+                            <div class="col-md-3"><label class="form-label small text-muted">Consolidação Normal</label><input type="text" class="form-control form-control-sm campo-calculo" id="consolidacao" placeholder="DD/MM/YYYY" /></div>
+                            <div class="col-md-3"><label class="form-label small text-muted">ALT_DATA_CREDITO (ano)</label><input type="text" class="form-control form-control-sm campo-calculo" id="dtR1658" placeholder="AAAA" /></div>
+                            <div class="col-md-3"><label class="form-label small text-muted">Atualizar Pendências</label><input type="text" class="form-control form-control-sm campo-calculo" id="atu_pendencias" placeholder="DD/MM/YYYY" /></div>
+                            <div class="col-md-3"><label class="form-label small text-muted">Consig. Margens (OS33)</label><input type="text" class="form-control form-control-sm campo-calculo" id="dtConsigPreflOs33" placeholder="DD/MM/YYYY" /></div>
+
+                            <div class="col-md-3"><label class="form-label small text-muted">Transf. Arq. Bancários</label><input type="text" class="form-control form-control-sm campo-calculo" id="dtTransfArqBanc" placeholder="DD/MM/YYYY" /></div>
+                            <div class="col-md-3"><label class="form-label small text-muted">Geração Contracheques</label><input type="text" class="form-control form-control-sm campo-calculo" id="dtCargaCchequeNet" placeholder="DD/MM/YYYY" /></div>
+                            <div class="col-md-3"><label class="form-label small text-muted">Análise Pendências</label><input type="text" class="form-control form-control-sm campo-calculo" id="dtAnalisePendencias" placeholder="DD/MM/YYYY" /></div>
+                            <div class="col-md-3"><label class="form-label small text-muted">Carrega Dados Contrib.</label><input type="text" class="form-control form-control-sm campo-calculo" id="dtCarregaDadosContrib" placeholder="DD/MM/YYYY" /></div>
+
+                            <div class="col-md-3"><label class="form-label small text-muted">Pagamento</label><input type="text" class="form-control form-control-sm campo-calculo" id="pagamento" placeholder="DD/MM/YYYY" /></div>
+
+                            <!-- GRUPOS DE RETROAÇÃO -->
+                            <div class="col-12 mt-4">
+                                <h6 class="text-primary collapse-toggle" data-bs-toggle="collapse" data-bs-target="#retroGroups" aria-expanded="false" aria-controls="retroGroups" style="cursor: pointer;">
+                                    <i class="bi bi-chevron-down me-1"></i> Grupos de Retroação (8 grupos) – clique para expandir
+                                </h6>
+                                <div class="collapse" id="retroGroups">
+                                    <div class="card card-body bg-body-tertiary">
+                                        <p class="text-muted small">Edite as datas de início e fim de cada grupo, bem como os períodos de auditoria e atributos.</p>
+                                        <div class="row g-2">
+                                            <!-- 119 meses (25430) -->
+                                            <div class="col-md-6"><strong>119 meses (25430)</strong></div>
+                                            <div class="col-md-2"><label class="form-label small">1706_ini</label><input type="text" class="form-control form-control-sm campo-calculo" id="r_1706_25430_ini" placeholder="DD/MM/AAAA" /></div>
+                                            <div class="col-md-2"><label class="form-label small">1706_fim</label><input type="text" class="form-control form-control-sm campo-calculo" id="r_1706_25430_fim" placeholder="DD/MM/AAAA" /></div>
+                                            <div class="col-md-2"><label class="form-label small">1615_ini_audit</label><input type="text" class="form-control form-control-sm campo-calculo" id="r_1615_25430_ini_audit" placeholder="DD/MM/AAAA" /></div>
+                                            <div class="col-md-2"><label class="form-label small">1615_fim_audit</label><input type="text" class="form-control form-control-sm campo-calculo" id="r_1615_25430_fim_audit" placeholder="DD/MM/AAAA" /></div>
+                                            <div class="col-md-2"><label class="form-label small">1615_ini_atrib</label><input type="text" class="form-control form-control-sm campo-calculo" id="r_1615_25430_ini_atrib" placeholder="DD/MM/AAAA" /></div>
+                                            <div class="col-md-2"><label class="form-label small">1615_fim_atrib</label><input type="text" class="form-control form-control-sm campo-calculo" id="r_1615_25430_fim_atrib" placeholder="DD/MM/AAAA" /></div>
+                                            <!-- 98 meses (25429) -->
+                                            <div class="col-md-6 mt-2"><strong>98 meses (25429)</strong></div>
+                                            <div class="col-md-2"><label class="form-label small">1706_ini</label><input type="text" class="form-control form-control-sm campo-calculo" id="r_1706_25429_ini" placeholder="DD/MM/AAAA" /></div>
+                                            <div class="col-md-2"><label class="form-label small">1706_fim</label><input type="text" class="form-control form-control-sm campo-calculo" id="r_1706_25429_fim" placeholder="DD/MM/AAAA" /></div>
+                                            <div class="col-md-2"><label class="form-label small">1615_ini_audit</label><input type="text" class="form-control form-control-sm campo-calculo" id="r_1615_25429_ini_audit" placeholder="DD/MM/AAAA" /></div>
+                                            <div class="col-md-2"><label class="form-label small">1615_fim_audit</label><input type="text" class="form-control form-control-sm campo-calculo" id="r_1615_25429_fim_audit" placeholder="DD/MM/AAAA" /></div>
+                                            <div class="col-md-2"><label class="form-label small">1615_ini_atrib</label><input type="text" class="form-control form-control-sm campo-calculo" id="r_1615_25429_ini_atrib" placeholder="DD/MM/AAAA" /></div>
+                                            <div class="col-md-2"><label class="form-label small">1615_fim_atrib</label><input type="text" class="form-control form-control-sm campo-calculo" id="r_1615_25429_fim_atrib" placeholder="DD/MM/AAAA" /></div>
+                                            <!-- 74 meses (25428) -->
+                                            <div class="col-md-6 mt-2"><strong>74 meses (25428)</strong></div>
+                                            <div class="col-md-2"><label class="form-label small">1706_ini</label><input type="text" class="form-control form-control-sm campo-calculo" id="r_1706_25428_ini" placeholder="DD/MM/AAAA" /></div>
+                                            <div class="col-md-2"><label class="form-label small">1706_fim</label><input type="text" class="form-control form-control-sm campo-calculo" id="r_1706_25428_fim" placeholder="DD/MM/AAAA" /></div>
+                                            <div class="col-md-2"><label class="form-label small">1615_ini_audit</label><input type="text" class="form-control form-control-sm campo-calculo" id="r_1615_25428_ini_audit" placeholder="DD/MM/AAAA" /></div>
+                                            <div class="col-md-2"><label class="form-label small">1615_fim_audit</label><input type="text" class="form-control form-control-sm campo-calculo" id="r_1615_25428_fim_audit" placeholder="DD/MM/AAAA" /></div>
+                                            <div class="col-md-2"><label class="form-label small">1615_ini_atrib</label><input type="text" class="form-control form-control-sm campo-calculo" id="r_1615_25428_ini_atrib" placeholder="DD/MM/AAAA" /></div>
+                                            <div class="col-md-2"><label class="form-label small">1615_fim_atrib</label><input type="text" class="form-control form-control-sm campo-calculo" id="r_1615_25428_fim_atrib" placeholder="DD/MM/AAAA" /></div>
+                                            <!-- 50 meses (25427) -->
+                                            <div class="col-md-6 mt-2"><strong>50 meses (25427)</strong></div>
+                                            <div class="col-md-2"><label class="form-label small">1706_ini</label><input type="text" class="form-control form-control-sm campo-calculo" id="r_1706_25427_ini" placeholder="DD/MM/AAAA" /></div>
+                                            <div class="col-md-2"><label class="form-label small">1706_fim</label><input type="text" class="form-control form-control-sm campo-calculo" id="r_1706_25427_fim" placeholder="DD/MM/AAAA" /></div>
+                                            <div class="col-md-2"><label class="form-label small">1615_ini_audit</label><input type="text" class="form-control form-control-sm campo-calculo" id="r_1615_25427_ini_audit" placeholder="DD/MM/AAAA" /></div>
+                                            <div class="col-md-2"><label class="form-label small">1615_fim_audit</label><input type="text" class="form-control form-control-sm campo-calculo" id="r_1615_25427_fim_audit" placeholder="DD/MM/AAAA" /></div>
+                                            <div class="col-md-2"><label class="form-label small">1615_ini_atrib</label><input type="text" class="form-control form-control-sm campo-calculo" id="r_1615_25427_ini_atrib" placeholder="DD/MM/AAAA" /></div>
+                                            <div class="col-md-2"><label class="form-label small">1615_fim_atrib</label><input type="text" class="form-control form-control-sm campo-calculo" id="r_1615_25427_fim_atrib" placeholder="DD/MM/AAAA" /></div>
+                                            <!-- 39 meses (613230) -->
+                                            <div class="col-md-6 mt-2"><strong>39 meses (613230)</strong></div>
+                                            <div class="col-md-2"><label class="form-label small">1706_ini</label><input type="text" class="form-control form-control-sm campo-calculo" id="r_1706_613230_ini" placeholder="DD/MM/AAAA" /></div>
+                                            <div class="col-md-2"><label class="form-label small">1706_fim</label><input type="text" class="form-control form-control-sm campo-calculo" id="r_1706_613230_fim" placeholder="DD/MM/AAAA" /></div>
+                                            <div class="col-md-2"><label class="form-label small">1615_ini_audit</label><input type="text" class="form-control form-control-sm campo-calculo" id="r_1615_613230_ini_audit" placeholder="DD/MM/AAAA" /></div>
+                                            <div class="col-md-2"><label class="form-label small">1615_fim_audit</label><input type="text" class="form-control form-control-sm campo-calculo" id="r_1615_613230_fim_audit" placeholder="DD/MM/AAAA" /></div>
+                                            <div class="col-md-2"><label class="form-label small">1615_ini_atrib</label><input type="text" class="form-control form-control-sm campo-calculo" id="r_1615_613230_ini_atrib" placeholder="DD/MM/AAAA" /></div>
+                                            <div class="col-md-2"><label class="form-label small">1615_fim_atrib</label><input type="text" class="form-control form-control-sm campo-calculo" id="r_1615_613230_fim_atrib" placeholder="DD/MM/AAAA" /></div>
+                                            <!-- 26 meses (206660) -->
+                                            <div class="col-md-6 mt-2"><strong>26 meses (206660)</strong></div>
+                                            <div class="col-md-2"><label class="form-label small">1706_ini</label><input type="text" class="form-control form-control-sm campo-calculo" id="r_1706_206660_ini" placeholder="DD/MM/AAAA" /></div>
+                                            <div class="col-md-2"><label class="form-label small">1706_fim</label><input type="text" class="form-control form-control-sm campo-calculo" id="r_1706_206660_fim" placeholder="DD/MM/AAAA" /></div>
+                                            <div class="col-md-2"><label class="form-label small">1615_ini_audit</label><input type="text" class="form-control form-control-sm campo-calculo" id="r_1615_206660_ini_audit" placeholder="DD/MM/AAAA" /></div>
+                                            <div class="col-md-2"><label class="form-label small">1615_fim_audit</label><input type="text" class="form-control form-control-sm campo-calculo" id="r_1615_206660_fim_audit" placeholder="DD/MM/AAAA" /></div>
+                                            <div class="col-md-2"><label class="form-label small">1615_ini_atrib</label><input type="text" class="form-control form-control-sm campo-calculo" id="r_1615_206660_ini_atrib" placeholder="DD/MM/AAAA" /></div>
+                                            <div class="col-md-2"><label class="form-label small">1615_fim_atrib</label><input type="text" class="form-control form-control-sm campo-calculo" id="r_1615_206660_fim_atrib" placeholder="DD/MM/AAAA" /></div>
+                                            <!-- 15 meses (213229) -->
+                                            <div class="col-md-6 mt-2"><strong>15 meses (213229)</strong></div>
+                                            <div class="col-md-2"><label class="form-label small">1706_ini</label><input type="text" class="form-control form-control-sm campo-calculo" id="r_1706_213229_ini" placeholder="DD/MM/AAAA" /></div>
+                                            <div class="col-md-2"><label class="form-label small">1706_fim</label><input type="text" class="form-control form-control-sm campo-calculo" id="r_1706_213229_fim" placeholder="DD/MM/AAAA" /></div>
+                                            <div class="col-md-2"><label class="form-label small">1615_ini_audit</label><input type="text" class="form-control form-control-sm campo-calculo" id="r_1615_213229_ini_audit" placeholder="DD/MM/AAAA" /></div>
+                                            <div class="col-md-2"><label class="form-label small">1615_fim_audit</label><input type="text" class="form-control form-control-sm campo-calculo" id="r_1615_213229_fim_audit" placeholder="DD/MM/AAAA" /></div>
+                                            <div class="col-md-2"><label class="form-label small">1615_ini_atrib</label><input type="text" class="form-control form-control-sm campo-calculo" id="r_1615_213229_ini_atrib" placeholder="DD/MM/AAAA" /></div>
+                                            <div class="col-md-2"><label class="form-label small">1615_fim_atrib</label><input type="text" class="form-control form-control-sm campo-calculo" id="r_1615_213229_fim_atrib" placeholder="DD/MM/AAAA" /></div>
+                                            <!-- 3 meses (206680) -->
+                                            <div class="col-md-6 mt-2"><strong>3 meses (206680)</strong></div>
+                                            <div class="col-md-2"><label class="form-label small">1706_ini</label><input type="text" class="form-control form-control-sm campo-calculo" id="r_1706_206680_ini" placeholder="DD/MM/AAAA" /></div>
+                                            <div class="col-md-2"><label class="form-label small">1706_fim</label><input type="text" class="form-control form-control-sm campo-calculo" id="r_1706_206680_fim" placeholder="DD/MM/AAAA" /></div>
+                                            <div class="col-md-2"><label class="form-label small">1615_ini_audit</label><input type="text" class="form-control form-control-sm campo-calculo" id="r_1615_206680_ini_audit" placeholder="DD/MM/AAAA" /></div>
+                                            <div class="col-md-2"><label class="form-label small">1615_fim_audit</label><input type="text" class="form-control form-control-sm campo-calculo" id="r_1615_206680_fim_audit" placeholder="DD/MM/AAAA" /></div>
+                                            <div class="col-md-2"><label class="form-label small">1615_ini_atrib</label><input type="text" class="form-control form-control-sm campo-calculo" id="r_1615_206680_ini_atrib" placeholder="DD/MM/AAAA" /></div>
+                                            <div class="col-md-2"><label class="form-label small">1615_fim_atrib</label><input type="text" class="form-control form-control-sm campo-calculo" id="r_1615_206680_fim_atrib" placeholder="DD/MM/AAAA" /></div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="col-12 d-flex justify-content-between mt-4">
+                                <div>
+                                    <button type="button" class="btn btn-outline-secondary" id="btnLimparCronograma"><i class="bi bi-eraser me-1"></i> Limpar</button>
+                                    <button type="button" class="btn btn-outline-primary ms-2" id="btnRecalcular"><i class="bi bi-arrow-clockwise me-1"></i> Recalcular</button>
+                                </div>
+                                <button type="submit" class="btn btn-rio"><i class="bi bi-file-earmark-word me-1"></i> Gerar e Baixar .DOCX</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div id="resCronograma" class="alert mt-3" style="display:none;"></div>
+            </div>
+
+            <!-- 5. ESTAGIÁRIOS -->
+            <div class="tab-pane fade" id="sec-estagiarios" role="tabpanel">
+                <div class="card card-custom">
+                    <div class="card-header-custom">
+                        <span><i class="bi bi-mortarboard me-2 text-success"></i> Planilhas de Liquidação (Estagiários)</span>
+                        <span class="badge bg-success">Módulo 5</span>
+                    </div>
+                    <div class="card-body">
+                        <form id="formEstagiarios" class="row g-3">
+                            <div class="col-md-6">
+                                <label for="mesAnoEstag" class="form-label fw-bold">Mês/Ano de Referência</label>
+                                <input type="text" class="form-control" id="mesAnoEstag" placeholder="MM/YYYY" required />
+                                <small class="text-muted">Ex: 09/2026</small>
+                            </div>
+                            <div class="col-12 text-center">
+                                <button type="submit" class="btn btn-rio"><i class="bi bi-file-earmark-excel me-1"></i> Gerar Planilhas</button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                <div id="loaderEstag" class="text-center my-4 loading-spinner" style="display:none;">
+                    <div class="spinner-border text-success" role="status"></div>
+                    <p class="mt-2 text-muted">Gerando arquivos...</p>
+                </div>
+                <div id="resEstagContainer" style="display: none;">
+                    <div class="card card-custom">
+                        <div class="card-header-custom">
+                            <span id="tituloEstag">Resultado da Liquidação</span>
+                            <button class="btn btn-sm btn-outline-success" id="btnExportarEstagCSV">
+                                <i class="bi bi-filetype-csv me-1"></i> Exportar CSV
+                            </button>
+                        </div>
+                        <div class="card-body p-0">
+                            <div class="tf-filterbar" id="tf-bar-tbEstag"></div>
+                            <div class="table-responsive" style="margin-top:10px;">
+                                <table class="table table-hover align-middle table-custom mb-0" id="tbEstag" style="width:98%; margin-left:10px;">
+                                    <thead>
+                                        <tr>
+                                            <th style="border-radius: 10px 0 0 0;">Matrícula</th>
+                                            <th>Nome</th>
+                                            <th>Cargo</th>
+                                            <th>CPF</th>
+                                            <th>Secretaria</th>
+                                            <th>SEC</th>
+                                            <th class="text-center">Bruto (R$)</th>
+                                            <th class="text-center">IR (R$)</th>
+                                            <th class="text-center">INSS (R$)</th>
+                                            <th class="text-center">Faltas (R$)</th>
+                                            <th class="text-center" style="border-radius: 0 10px 0 0;">Líquido (R$)</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="bodyEstag"></tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 6. CARGA DE ARQUIVOS -->
+            <div class="tab-pane fade" id="sec-cargaarquivos" role="tabpanel">
+                <div class="card card-custom">
+                    <div class="card-header-custom">
+                        <span><i class="bi bi-archive me-2 text-secondary"></i> Carga de Arquivos</span>
+                        <span class="badge bg-secondary">Módulo 6</span>
+                    </div>
+                    <div class="card-body">
+                        <ul class="nav nav-tabs" id="cargaTabs" role="tablist">
+                            <li class="nav-item"><button class="nav-link active" id="carga-tab-dashboard" data-bs-toggle="tab" data-bs-target="#cargaDashboard" type="button" role="tab">Dashboard</button></li>
+                            <li class="nav-item"><button class="nav-link" id="carga-tab-console" data-bs-toggle="tab" data-bs-target="#cargaConsole" type="button" role="tab">Console</button></li>
+                        </ul>
+                        <div class="tab-content mt-3">
+                            <div class="tab-pane fade show active" id="cargaDashboard" role="tabpanel">
+                                <div class="d-flex justify-content-end mb-3" style="gap:8px; flex-wrap:wrap;">
+                                    <div class="month-filter" id="month-filter-carga">
+                                        <button class="month-filter-btn" id="month-filter-btn-carga" type="button" aria-haspopup="true" aria-expanded="false">
+                                            <i class="bi bi-calendar3"></i>
+                                            <span id="month-filter-label-carga">Mês</span>
+                                            <i class="bi bi-chevron-down"></i>
+                                        </button>
+                                        <div class="month-menu" id="month-menu-carga"></div>
+                                    </div>
+                                    <div class="filter-select"><select id="secretaria-select-carga"><option value="todas">Todas as Secretarias</option></select></div>
+                                    <div class="filter-select"><select id="rubrica-select-carga"><option value="todas">Todas as Rubricas</option></select></div>
+                                </div>
+                                <div class="teto-legend">
+                                    <span><span class="teto-dot vol"></span>Volume utilizado</span>
+                                    <span><span class="teto-dot teto"></span>Valor total do teto</span>
+                                </div>
+                                <div class="sec-list" id="sec-list-carga"></div>
+                                <hr class="my-4" />
+                                <h6 class="mt-3"><i class="bi bi-clock-history me-2"></i>Histórico de Execuções</h6>
+                                <div id="log-days-list-carga"></div>
+                            </div>
+                            <div class="tab-pane fade" id="cargaConsole" role="tabpanel">
+                                <div class="card card-custom mb-3">
+                                    <div class="card-header-custom"><span><i class="bi bi-play-circle"></i> Execução Manual</span><span class="pill idle" id="run-pill-carga">idle</span></div>
+                                    <div class="card-body">
+                                        <button class="run-btn" id="run-btn-carga">
+                                            <span class="btn-icon"><i class="bi bi-play-fill"></i></span>
+                                            <span id="run-txt-carga">Executar processo completo</span>
+                                            <div class="btn-spin" id="run-spin-carga" style="display:none;"></div>
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="card card-custom mb-3">
+                                    <div class="card-header-custom"><span><i class="bi bi-calendar-event"></i> Agendamento Diário</span><span class="pill idle" id="sched-pill-carga">inativo</span></div>
+                                    <div class="card-body">
+                                        <div class="sched-row">
+                                            <input type="time" id="sched-time-carga" value="08:00" class="form-control form-control-sm" style="width:auto;" />
+                                            <button class="btn btn-success btn-sm" id="sched-btn-carga"><i class="bi bi-calendar-plus"></i> Agendar</button>
+                                            <button class="btn btn-danger btn-sm" id="cancel-btn-carga"><i class="bi bi-calendar-x"></i> Cancelar</button>
+                                        </div>
+                                        <div class="sched-status" id="sched-st-carga"><i class="bi bi-clock"></i><span id="sched-st-txt-carga">Verificando agendamento...</span></div>
+                                    </div>
+                                </div>
+                                <div class="card card-custom mb-3">
+                                    <div class="card-header-custom"><span><i class="bi bi-calendar-week"></i> Janela de Recebimento</span><span class="pill idle" id="janela-pill-carga">inativa</span></div>
+                                    <div class="card-body">
+                                        <div class="sched-row mb-2">
+                                            <input type="number" id="janela-de-carga" min="1" max="31" placeholder="De" class="form-control form-control-sm" style="width:80px;" />
+                                            <span class="janela-sep">até</span>
+                                            <input type="number" id="janela-ate-carga" min="1" max="31" placeholder="Até" class="form-control form-control-sm" style="width:80px;" />
+                                            <button class="btn btn-success btn-sm" id="janela-btn-carga"><i class="bi bi-calendar-plus"></i> Salvar</button>
+                                            <button class="btn btn-danger btn-sm" id="janela-cancel-btn-carga"><i class="bi bi-calendar-x"></i> Remover</button>
+                                        </div>
+                                        <div class="sched-status" id="janela-st-carga"><i class="bi bi-calendar-week"></i><span id="janela-st-txt-carga">Verificando janela de recebimento...</span></div>
+                                        <div class="sched-row mt-2">
+                                            <span class="janela-sep">Exceção: até o dia</span>
+                                            <input type="number" id="excecao-dia-carga" min="1" max="31" placeholder="Dia" class="form-control form-control-sm" style="width:80px;" />
+                                            <button class="btn btn-success btn-sm" id="excecao-btn-carga"><i class="bi bi-calendar-plus"></i> Definir exceção</button>
+                                            <button class="btn btn-danger btn-sm" id="excecao-cancel-btn-carga"><i class="bi bi-calendar-x"></i> Remover exceção</button>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="card card-custom">
+                                    <div class="card-header-custom"><span><i class="bi bi-terminal"></i> Log do Processo</span><button class="btn btn-sm btn-outline-secondary" id="clear-btn-carga"><i class="bi bi-eraser"></i> limpar</button></div>
+                                    <div class="card-body"><div class="log-body" id="log-body-carga"></div></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div><!-- /main-tab-content -->
+    </div><!-- /main-content -->
+
+    <!-- ============================================================
+    BOTÃO VOLTAR AO TOPO
+    ============================================================ -->
+    <button id="btnBackToTop" title="Voltar ao topo" onclick="scrollToTop()">
+        <i class="bi bi-arrow-up-short"></i>
+    </button>
+
+    <!-- ============================================================
+    MODAL DE GESTÃO DE USUÁRIOS
+    ============================================================ -->
+    <div class="modal fade" id="modalGestao" tabindex="-1" aria-labelledby="modalGestaoLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg modal-dialog-centered">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="modalGestaoLabel"><i class="bi bi-people-fill"></i> Gerenciar Usuários</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <div class="mb-3"><input type="text" class="form-control" id="searchUserInput" placeholder="Buscar por usuário ou nome..." /></div>
+                    <div class="table-responsive" style="max-height: 350px; overflow-y: auto;">
+                        <table class="table table-user-list table-hover mb-0">
+                            <thead><tr><th>Usuário</th><th>Nome</th><th>Perfil</th><th style="width: 180px;">Ações</th></tr></thead>
+                            <tbody id="tbodyUsuarios"></tbody>
+                        </table>
+                    </div>
+                    <hr class="my-3" />
+                    <h6 class="mb-3"><i class="bi bi-person-plus me-1"></i> Adicionar Novo Usuário</h6>
+                    <form id="formNovoUsuario" class="row g-2">
+                        <div class="col-md-3"><input type="text" class="form-control" id="novoUsuario" placeholder="Usuário" required /></div>
+                        <div class="col-md-3"><input type="text" class="form-control" id="novoNome" placeholder="Nome" required /></div>
+                        <div class="col-md-3"><input type="password" class="form-control" id="novaSenha" placeholder="Senha" required /></div>
+                        <div class="col-md-2"><select class="form-select" id="novoPerfil"><option value="comum">Comum</option><option value="admin">Admin</option></select></div>
+                        <div class="col-md-1"><button type="submit" class="btn btn-primary w-100"><i class="bi bi-plus-lg"></i></button></div>
+                    </form>
+                    <div id="msgGestao" class="mt-3"></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS e Script personalizado -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js">
+    </script>
+    <script src="Scripts.js"></script>
+
+</body>
+</html>
